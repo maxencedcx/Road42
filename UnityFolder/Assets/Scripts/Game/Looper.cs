@@ -7,8 +7,6 @@ public class Looper : MonoBehaviour
     private static Looper _instance;
     public static Looper Instance { get { return _instance; } }
 
-    [SerializeField] private int planeLength = 3;
-    [SerializeField] private int speed = 10;
     private Dictionary<int, Transform> _planes = new Dictionary<int, Transform>();
 
     private void Awake()
@@ -22,14 +20,14 @@ public class Looper : MonoBehaviour
     private void Update()
     {
         float modifier = Time.deltaTime;
-        float value = 1 * modifier * speed;
+        float value = 1 * modifier * GameSettings.speed;
 
         for (int i = 0; i < _planes.Count; ++i)
         {
             _planes[i].position = new Vector3(0, -0.2f, _planes[i].position.z - value);
-            if (_planes[i].position.z < (-1 * planeLength * _planes.Count))
+            if (_planes[i].position.z < (GameSettings.oob))
                 _planes[i].position = new Vector3(0, -0.2f, _planes[(i + 1) % _planes.Count].position.z +
-                    ((i == (_planes.Count - 1)) ? ((planeLength * 2)) : (planeLength * 2 - value)));
+                    ((i == (_planes.Count - 1)) ? (8) : (8 - value)));
         }
     }
 
