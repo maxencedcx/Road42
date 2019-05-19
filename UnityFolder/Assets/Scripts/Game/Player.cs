@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -31,5 +32,11 @@ public class Player : MonoBehaviour
             v.x = (v.x < 0) ? (-diff) : (diff);
         }
         return v;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Obstacle"))
+            SceneManager.LoadScene("Menu");
     }
 }

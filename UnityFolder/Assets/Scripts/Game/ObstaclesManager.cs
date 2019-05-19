@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 public class ObstaclesManager : MonoBehaviour
 {
@@ -23,20 +24,12 @@ public class ObstaclesManager : MonoBehaviour
     public static ObstaclesManager Instance { get { return _instance; } }
     public static int obstacleId = 0;
 
-    [SerializeField] GameObject obstaclePrefab = null;
+    private static List<float> possibleXSpawns = new List<float> { 1.9f, 5.7f, -1.9f, -5.7f};
+    [SerializeField] private GameObject obstaclePrefab = null;
+    [SerializeField] private int numberOfObstacles = 4;
 
+    private System.Random r;
     private List<Obstacle> _obstacles = new List<Obstacle>();
-    private List<Vector3> _availableSpawns = new List<Vector3>()
-    {
-        {new Vector3(-5.7f, 0.75f, 12)},
-        {new Vector3(-1.9f, 0.75f, 12)},
-        {new Vector3(1.9f, 0.75f, 12)},
-        {new Vector3(5.7f, 0.75f, 12)},
-        {new Vector3(-5.7f, 0.75f, 18)},
-        {new Vector3(-1.9f, 0.75f, 18)},
-        {new Vector3(1.9f, 0.75f, 18)},
-        {new Vector3(5.7f, 0.75f, 18)}
-    };
 
     private void Awake()
     {
@@ -48,26 +41,25 @@ public class ObstaclesManager : MonoBehaviour
 
     private void Start()
     {
-        for (int i = 0; i < 4; ++i)
+        r = new System.Random();
+        for (int i = 0; i < numberOfObstacles; ++i)
         {
             Vector3 pos = GetRandomAvailableSpawn(obstacleId);
-            GameObject obj = Instantiate(obstaclePrefab, pos, Quaternion.identity);
+            GameObject obj = Instantiate(obstaclePrefab, pos, Quaternion.identity, transform);
             _obstacles.Add(new Obstacle(pos, obj.transform));
         }
-
     }
 
     private void Update()
     {
         float modifier = Time.deltaTime;
-        float value = 1 * modifier * GameSettings.speed;
+        float value = 1 * modifier * GameSettings.Instance.speed;
 
         foreach (var obstacle in _obstacles)
         {
             obstacle.transform.position = new Vector3(obstacle.transform.position.x, 0.75f, obstacle.transform.position.z - value);
-            if (obstacle.transform.position.z <= GameSettings.oob)
+            if (obstacle.transform.position.z <= GameSettings.Instance.oob)
             {
-                _availableSpawns.Add(obstacle.initialPos);
                 Vector3 pos = GetRandomAvailableSpawn(obstacle.id);
                 obstacle.transform.position = pos;
                 obstacle.initialPos = pos;
@@ -77,10 +69,8 @@ public class ObstaclesManager : MonoBehaviour
 
     private Vector3 GetRandomAvailableSpawn(int id)
     {
-        List<Vector3> tmpList = _availableSpawns.Where(x => x.z == ((id < 3) ? (12) : (18))).ToList();
-        Vector3 pos = tmpList[Random.Range(0, tmpList.Count - 1)];
-        _availableSpawns.Remove(pos);
+        float Zpos = (_obstacles.Count == 0) ? (12) : (_obstacles.Max(x => x.transform.position.z) + 6);
+        Vector3 pos = new Vector3(possibleXSpawns[r.Next(possibleXSpawns.Count)], 0.75f, Zpos);
         return pos;
     }
-
 }
